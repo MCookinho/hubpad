@@ -133,7 +133,25 @@ def api_unlock():
     else:
         return jsonify({'success': False, 'error': 'Wrong password'})
 
-if __name__ == '__main__':
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok', 'message': 'Hubpad is running'})
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    return response
+
+def initialize_data():
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    if not os.path.exists(DATA_FILE):
+        save_messages([])
+
+initialize_data()
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
