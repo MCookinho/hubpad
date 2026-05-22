@@ -1,190 +1,190 @@
 # Hubpad
 
-O mural público de tudo e de todos.
+The public mural of everything and everyone.
 
-## Funcionalidades
+## Features
 
-- 📝 Criar posts com título, texto e anexos
-- 🔒 Proteger posts com senha (apenas título visível publicamente)
-- 🌐 Suporte a 3 idiomas: Português, English, Español
-- 📱 Responsivo (funciona no celular)
-- 🔍 Buscar por título, texto, ID ou nome de arquivo
-- 🎲 Modo aleatório
-- 🌙 Tema claro/escuro
-- 📁 Anexar imagens, vídeos, áudios, PDFs, documentos e mais
+- 📝 Create posts with title, text, and attachments
+- 🔒 Password-protected posts (only title is publicly visible)
+- 🌐 3 languages supported: Portuguese, English, Spanish
+- 📱 Mobile-responsive
+- 🔍 Search by title, text, ID, or filename
+- 🎲 Random mode
+- 🌙 Light/Dark theme
+- 📁 Attach images, videos, audio, PDFs, documents, and more
 
-## Tecnologias
+## Tech Stack
 
 - **Backend**: Python + Flask
 - **Frontend**: HTML, CSS, JavaScript
-- **Armazenamento**: Arquivos JSON + disco local
-- **Segurança**: Senhas hasheadas com Werkzeug
+- **Storage**: JSON files + local disk
+- **Security**: Passwords hashed with Werkzeug
 
 ---
 
-## Rodar Localmente
+## Run Locally
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/SEU_USUARIO/hubpad.git
+# 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/hubpad.git
 cd hubpad
 
-# 2. Crie um ambiente virtual
+# 2. Create a virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# ou
+# or
 venv\Scripts\activate  # Windows
 
-# 3. Instale as dependências
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Rode
+# 4. Run
 python app.py
-# ou
+# or
 ./run.sh
 ```
 
-Acesse: http://localhost:5000
+Access at: http://localhost:5000
 
 ---
 
-## Deploy
+## Deployment
 
-### ⭐ MELHOR OPÇÃO: PythonAnywhere (Persistente)
+### ⭐ BEST OPTION: PythonAnywhere (Persistent)
 
-PythonAnywhere mantém os arquivos permanentes (posts e uploads NÃO são deletados).
+PythonAnywhere keeps files permanent (posts and uploads are NOT deleted).
 
-**Passo a passo:**
+**Step by step:**
 
-1. Acesse https://www.pythonanywhere.com e crie uma conta gratuita
-2. Vá em **Dashboard** → **Web** → **Add a new web app**
-3. Escolha **Manual configuration** → **Python 3.10+**
-4. Vá em **Consoles** → **Start a new console: Bash**
-5. Rode no console:
+1. Go to https://www.pythonanywhere.com and create a free account
+2. Go to **Dashboard** → **Web** → **Add a new web app**
+3. Choose **Manual configuration** → **Python 3.10+**
+4. Go to **Consoles** → **Start a new console: Bash**
+5. Run in the console:
 ```bash
-git clone https://github.com/SEU_USUARIO/hubpad.git
+git clone https://github.com/YOUR_USERNAME/hubpad.git
 cd hubpad
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-6. Volte em **Web** e configure:
-   - **Source code**: `/home/SEU_USUARIO/hubpad`
-   - **Working directory**: `/home/SEU_USUARIO/hubpad`
-   - **Virtualenv**: `/home/SEU_USUARIO/hubpad/venv`
+6. Go back to **Web** and configure:
+   - **Source code**: `/home/YOUR_USERNAME/hubpad`
+   - **Working directory**: `/home/YOUR_USERNAME/hubpad`
+   - **Virtualenv**: `/home/YOUR_USERNAME/hubpad/venv`
 
-7. Clique em **WSGI configuration file** e edite para:
+7. Click **WSGI configuration file** and edit to:
 ```python
 import sys
 
-path = '/home/SEU_USUARIO/hubpad'
+path = '/home/YOUR_USERNAME/hubpad'
 if path not in sys.path:
     sys.path.append(path)
 
 from app import app as application
 ```
 
-8. Clique em **Reload**: `SEU_USUARIO.pythonanywhere.com`
+8. Click **Reload**: `YOUR_USERNAME.pythonanywhere.com`
 
-**Pronto!** Seu app está no ar e os dados são persistentes.
+**Done!** Your app is live and data is persistent.
 
 ---
 
-### ⚡ Opção Rápida: Render.com (Resetável)
+### ⚡ Quick Option: Render.com (Resettable)
 
-**Aviso**: No plano gratuito do Render, os arquivos são resetados toda vez que o app reinicia (cerca de 1 vez por dia). Use apenas para teste.
+**Warning**: On Render's free tier, files are reset every time the app restarts (about once per day). Use only for testing.
 
-**Passo a passo:**
+**Step by step:**
 
-1. Acesse https://render.com e crie uma conta
-2. Clique em **New** → **Web Service**
-3. Conecte seu repositório GitHub
-4. Preencha:
-   - **Name**: `hubpad` (ou qualquer nome)
-   - **Region**: São Paulo ou mais próxima
+1. Go to https://render.com and create an account
+2. Click **New** → **Web Service**
+3. Connect your GitHub repository
+4. Fill in:
+   - **Name**: `hubpad` (or any name)
+   - **Region**: São Paulo or the closest one
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `gunicorn app:app --preload`
    - **Environment**: Python 3
    - **Plan**: Free
 
-5. Clique em **Deploy**
+5. Click **Deploy**
 
-Após ~2 minutos, seu app estará disponível em `https://hubpad-SEU_CODIGO.onrender.com`
+After ~2 minutes, your app will be available at `https://hubpad-YOUR_CODE.onrender.com`
 
 ---
 
 ### 🚂 Railway (Trial)
 
-Similar ao Render, mas com trial de $5 de crédito.
+Similar to Render, but with $5 credit trial.
 
 1. https://railway.app
 2. New Project → Deploy from GitHub repo
-3. Configure as variáveis de ambiente (se precisar)
+3. Configure environment variables (if needed)
 4. Deploy
 
 ---
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 hubpad/
-├── app.py                 # Aplicação Flask
-├── requirements.txt       # Dependências
-├── Procfile               # Deploy em plataformas PaaS
-├── runtime.txt            # Versão Python
-├── run.sh                 # Script local
-├── .gitignore             # Arquivos ignorados pelo git
-├── README.md              # Este arquivo
+├── app.py                 # Flask application
+├── requirements.txt       # Dependencies
+├── Procfile               # PaaS deployment
+├── runtime.txt            # Python version
+├── run.sh                 # Local script
+├── .gitignore             # Git ignored files
+├── README.md              # This file
 ├── data/
-│   ├── .gitkeep           # (mantém pasta)
-│   └── messages.json      # Dados dos posts (ignorado pelo git)
+│   ├── .gitkeep           # (keeps folder)
+│   └── messages.json      # Posts data (git ignored)
 ├── static/
 │   └── uploads/
-│       └── .gitkeep       # Anexos (aqui ficam as imagens/vídeos)
+│       └── .gitkeep       # Attachments (images/videos go here)
 └── templates/
-    └── index.html         # Todo o frontend (HTML + CSS + JS)
+    └── index.html         # Entire frontend (HTML + CSS + JS)
 ```
 
 ---
 
-## Considerações sobre Persistência
+## Persistence Considerations
 
-Este app usa **armazenamento em disco local** (arquivos JSON). Isso significa:
+This app uses **local disk storage** (JSON files). This means:
 
-✅ **Funciona perfeitamente** em:
-- Seu computador
+✅ **Works perfectly** on:
+- Your computer
 - PythonAnywhere
-- VPS/Dedicados
-- Docker com volumes
+- VPS/Dedicated servers
+- Docker with volumes
 
-⚠️ **Dados são RESETADOS** em:
+⚠️ **Data gets RESET** on:
 - Render (Free tier)
 - Vercel
 - Netlify
-- Qualquer plataforma "serverless"
+- Any "serverless" platform
 
-**Para produção real**, considere migrar para:
-- Banco de dados: PostgreSQL, Supabase, PlanetScale
-- Armazenamento de arquivos: Cloudinary, AWS S3, Supabase Storage
-
----
-
-## Variáveis de Ambiente
-
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `PORT` | `5000` | Porta do servidor |
-| `FLASK_DEBUG` | `false` | Modo debug |
+**For real production**, consider migrating to:
+- Database: PostgreSQL, Supabase, PlanetScale
+- File storage: Cloudinary, AWS S3, Supabase Storage
 
 ---
 
-## Licença
+## Environment Variables
 
-MIT - Use como quiser.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `5000` | Server port |
+| `FLASK_DEBUG` | `false` | Debug mode |
 
 ---
 
-## Criador
+## License
 
-Criado com ❤️ usando opencode
+MIT - Use however you want.
+
+---
+
+## Creator
+
+Built with ❤️ using opencode
