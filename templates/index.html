@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hubpad</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dark: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #020617;
+            --bg-tertiary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --accent: #818cf8;
+            --accent-light: #a5b4fc;
+            --accent-dark: #6366f1;
+            --accent-glow: rgba(129, 140, 248, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+            50% { box-shadow: 0 0 0 12px transparent; }
+        }
+
+        @keyframes shuffle {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 28px;
+            background: linear-gradient(180deg, var(--accent), #ec4899);
+            border-radius: 4px;
+        }
+
+        .logo span {
+            font-size: 32px;
+            -webkit-text-fill-color: var(--accent);
+            color: var(--accent);
+            background: none;
+            font-weight: 900;
+        }
+
+        .modal-logo span {
+            -webkit-text-fill-color: var(--accent);
+            color: var(--accent);
+            background: none;
+            font-size: 40px;
+            font-weight: 900;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: var(--radius-xl);
+        }
+
+        .tab-btn {
+            padding: 8px 18px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-primary);
+            color: var(--accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-input-header {
+            padding: 8px 16px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            font-size: 14px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            outline: none;
+            width: 200px;
+            transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+        }
+
+        .search-input-header:focus {
+            border-color: var(--accent);
+            width: 260px;
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background-color: var(--bg-primary);
+        }
+
+        .search-input-header.hidden {
+            opacity: 0;
+            width: 0;
+            padding: 0;
+            border-width: 0;
+            pointer-events: none;
+        }
+
+        [data-theme="dark"] .search-input-header {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .theme-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 28px 16px;
+        }
+
+        .compose-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .compose-card:focus-within {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent);
+        }
+
+        .compose-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .compose-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compose-body {
+            padding: 18px 20px;
+        }
+
+        .compose-title-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: transparent;
+            font-family: inherit;
+            padding: 0 0 12px 0;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .compose-title-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .compose-textarea {
+            width: 100%;
+            min-height: 70px;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .compose-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .compose-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .compose-footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .attach-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .attach-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .divider-v {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        .private-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .private-toggle-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .file-names {
+            font-size: 13px;
+            color: var(--accent);
+            background: var(--accent-glow);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+
+        .compose-password-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-top: 1px dashed var(--border-color);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.03), rgba(59, 130, 246, 0.03));
+        }
+
+        .compose-password-input {
+            flex: 1;
+            max-width: 280px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .compose-password-input:focus {
+            border-color: #a855f7;
+        }
+
+        .compose-password-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 var(--accent-glow);
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .shuffle-btn-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 auto 32px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px 0 var(--accent-glow);
+            animation: pulse-glow 2s infinite;
+        }
+
+        .shuffle-btn-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px 0 var(--accent-glow);
+        }
+
+        .shuffle-btn-main.shuffling svg {
+            animation: shuffle 0.5s ease;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            max-width: 480px;
+            width: 100%;
+            padding: 32px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .modal-logo {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 16px;
+        }
+
+        .modal-logo::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 36px;
+            background: linear-gradient(180deg, var(--accent), #ec4899);
+            border-radius: 5px;
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .modal-section p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .modal-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 20px 0;
+        }
+
+        .modal-creator {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .creator-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .creator-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .creator-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .github-link:hover {
+            color: var(--accent-light);
+        }
+
+        .settings-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: rotate(30deg);
+        }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-card);
+        }
+
+        .lang-option:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .lang-option.active {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .lang-flag {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .lang-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        .lang-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .toggle-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        .lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .private-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 12px;
+            font-size: 11px;
+            color: #a855f7;
+            margin-left: auto;
+        }
+
+        .private-locked-area {
+            margin-top: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(59, 130, 246, 0.05));
+            border: 1px dashed rgba(168, 85, 247, 0.3);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .private-icon-wrapper {
+            margin-bottom: 12px;
+        }
+
+        .private-icon-wrapper svg {
+            width: 36px;
+            height: 36px;
+            opacity: 0.6;
+            color: var(--text-muted);
+        }
+
+        .private-locked-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .private-locked-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .private-unlock-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .private-password-input {
+            flex: 1;
+            max-width: 220px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .private-password-input:focus {
+            border-color: var(--accent);
+        }
+
+        .private-unlock-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .private-unlock-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .private-error-msg {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #ef4444;
+            display: none;
+        }
+
+        .private-message-content {
+            display: none;
+        }
+
+        @media (max-width: 500px) {
+            .lang-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .message {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .message.visible {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .message:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .message-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .message-id {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-id::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .message-date {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .message-body {
+            padding: 20px;
+        }
+
+        .message-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+        }
+
+        .message-text:empty {
+            display: none;
+        }
+
+        .message-files {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .file-preview {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            transition: all 0.3s ease;
+        }
+
+        .file-preview:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .file-preview img,
+        .file-preview video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .file-icon {
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+
+        .file-info {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: var(--bg-card);
+            font-weight: 500;
+        }
+
+        .file-preview a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .text-preview {
+            max-height: 150px;
+            overflow: hidden;
+            padding: 14px;
+            font-size: 11px;
+            font-family: monospace;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .search-bar-mobile {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+            @media (max-width: 768px) {
+             .message-files {
+                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+             }
+            .header-center {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+            .search-input-header {
+                display: none;
+            }
+            .search-bar-mobile {
+                display: block;
+            }
+            .search-bar-mobile .search-input {
+                width: 100%;
+                padding: 12px 16px 12px 44px;
+                border-radius: var(--radius-xl);
+                font-size: 15px;
+            }
+            .message-files {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+             .compose-footer {
+                 flex-direction: column;
+                 align-items: stretch;
+             }
+             .compose-footer-left {
+                 justify-content: center;
+                 flex-wrap: wrap;
+                 gap: 8px;
+             }
+             .divider-v {
+                 display: none;
+             }
+             .send-btn {
+                 width: 100%;
+                 margin-top: 10px;
+             }
+             .compose-password-row {
+                 flex-direction: column;
+                 align-items: stretch;
+             }
+             .compose-password-input {
+                 max-width: none;
+             }
+         }
+
+        @media (max-width: 480px) {
+            .tabs {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <header class="header">
+        <div class="logo" id="logoBtn"><span>H</span>ubpad</div>
+        
+        <div class="header-center">
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="feed">Feed</button>
+                <button class="tab-btn" data-tab="random">Aleatório</button>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <input type="text" class="search-input-header" id="searchInput" placeholder="Pesquisar...">
+            <button class="theme-btn" id="themeToggle" title="Alternar tema">
+                <svg id="sunIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                </svg>
+                <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <button class="settings-btn" id="settingsBtn" title="Configurações">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="compose-card">
+            <div class="compose-header">
+                <span class="compose-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span class="compose-title-text" data-i18n="compose_title">Nova mensagem</span>
+                </span>
+            </div>
+            <form action="/post" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="lang" id="postLang" value="pt">
+                <div class="compose-body">
+                    <input type="text" name="title" class="compose-title-input" data-i18n="compose_title_placeholder" placeholder="Título (opcional)">
+                    <textarea name="text" class="compose-textarea" data-i18n="compose_placeholder" placeholder="Escreva algo, adicione arquivos, compartilhe..."></textarea>
+                </div>
+
+                <input type="file" name="files" multiple accept="image/*,video/*,audio/*,.txt,.pdf,.doc,.docx,.xls,.xlsx,.zip" style="display: none;" id="fileInput">
+                <div class="compose-footer">
+                    <div class="compose-footer-left">
+                        <label class="attach-btn" for="fileInput">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                            <span class="attach-text" data-i18n="attach">Anexar</span>
+                        </label>
+
+                        <div class="divider-v"></div>
+
+                        <div class="private-toggle-wrapper">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.7;">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span class="private-toggle-label" data-i18n="private_toggle">Proteger</span>
+                            <div class="toggle-switch" id="privateToggle"></div>
+                        </div>
+
+                        <span class="file-names" id="fileNames"></span>
+                    </div>
+                    <button type="submit" class="send-btn" data-i18n="send">Enviar</button>
+                </div>
+
+                <input type="checkbox" name="is_private" id="isPrivateCheckbox" style="display: none;">
+                <div class="compose-password-row" id="passwordField" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; flex-shrink: 0;">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" name="password" class="compose-password-input" data-i18n="private_password_placeholder" placeholder="Digite uma senha...">
+                </div>
+                <div class="upload-error" id="uploadError" style="display: none; margin-top: 10px; padding: 10px 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; font-size: 13px; font-weight: 500;"></div>
+            </form>
+        </div>
+
+        <div class="tab-content active" id="feed">
+            <div class="search-bar-mobile">
+                <input type="text" class="search-input search-input-header" id="searchInputMobile" placeholder="Pesquisar mensagens...">
+            </div>
+            <div id="feedMessages">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="message" data-message="{{ message.id }}" {% if message.is_private %}data-is-private="true"{% endif %}>
+                    <div class="message-header">
+                        <span class="message-id">#{{ message.id }}</span>
+                        <span class="message-date">{{ message.date }}</span>
+                        {% if message.is_private %}
+                        <span class="private-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="message-body">
+                        {% if message.is_private %}
+                            {% if message.title %}
+                            <h3 class="message-title">{{ message.title }}</h3>
+                            {% endif %}
+                            <div class="private-locked-area" data-message-id="{{ message.id }}">
+                            </div>
+                        {% else %}
+                            {% if message.title %}
+                            <h3 class="message-title">{{ message.title }}</h3>
+                            {% endif %}
+                            <div class="message-text">{{ message.text }}</div>
+                            {% if message.files %}
+                        <div class="message-files">
+                            {% for file in message.files %}
+                            <div class="file-preview">
+                                {% set ext = file.filename.split('.')[-1].lower() %}
+                                {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
+                                <a href="/uploads/{{ file.filename }}" target="_blank">
+                                    <img src="/uploads/{{ file.filename }}" alt="{{ file.original }}" loading="lazy">
+                                </a>
+                                {% elif ext in ['mp4', 'webm', 'ogg'] %}
+                                <a href="/uploads/{{ file.filename }}" target="_blank">
+                                    <video src="/uploads/{{ file.filename }}" muted controls playsinline></video>
+                                </a>
+                                {% elif ext in ['mp3', 'wav', 'ogg', 'm4a'] %}
+                                <div>
+                                    <audio controls style="width: 100%;">
+                                        <source src="/uploads/{{ file.filename }}">
+                                    </audio>
+                                </div>
+                                {% elif ext == 'txt' %}
+                                <a href="/uploads/{{ file.filename }}" target="_blank">
+                                    <div class="text-preview" data-txt="/uploads/{{ file.filename }}">Carregando...</div>
+                                </a>
+                                {% else %}
+                                <a href="/uploads/{{ file.filename }}" target="_blank">
+                                    <div class="file-icon">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                        </svg>
+                                        <span style="font-size: 12px; font-weight: 600;">{{ ext.upper() }}</span>
+                                    </div>
+                                </a>
+                                {% endif %}
+                                <div class="file-info" title="{{ file.original }}">{{ file.original }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                         {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.4; margin-bottom: 16px;">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+                <h3>Nenhuma mensagem ainda</h3>
+                <p>Seja o primeiro a compartilhar algo!</p>
+            </div>
+            {% endif %}
+            </div>
+            <div id="noResults" class="no-results">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3; margin-bottom: 12px;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                    <line x1="8" y1="8" x2="14" y2="14"></line>
+                    <line x1="14" y1="8" x2="8" y2="14"></line>
+                </svg>
+                <p>Nenhuma mensagem encontrada</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="random">
+            <button class="shuffle-btn-main" id="loadRandom">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                <span class="random-text" data-i18n="random_btn">Próximo Aleatório</span>
+            </button>
+            <div id="randomMessage"></div>
+        </div>
+    </main>
+
+    <script>
+        const messagesData = {{ messages|tojson|safe }};
+
+        const translations = {
+            pt: {
+                compose_title: 'Nova mensagem',
+                compose_title_placeholder: 'Título (opcional)',
+                compose_placeholder: 'Escreva algo, adicione arquivos, compartilhe...',
+                attach: 'Anexar',
+                send: 'Enviar',
+                tab_feed: 'Feed',
+                tab_random: 'Aleatório',
+                search_placeholder: 'Pesquisar...',
+                search_mobile_placeholder: 'Pesquisar mensagens...',
+                search_no_results: 'Nenhuma mensagem encontrada',
+                random_btn: 'Próximo Aleatório',
+                empty_title: 'Nenhuma mensagem ainda',
+                empty_desc: 'Seja o primeiro a compartilhar algo!',
+                random_empty_title: 'Nenhuma mensagem disponível',
+                random_empty_desc: 'Seja o primeiro a postar algo!',
+                settings_title: 'Configurações',
+                settings_subtitle: 'Personalize sua experiência',
+                settings_language: 'Idioma',
+                settings_feed: 'Feed',
+                settings_show_all: 'Ver todos os posts',
+                settings_show_all_desc: 'Desative para ver apenas posts do seu idioma',
+                about_title: 'O que é o Hubpad?',
+                about_desc: 'Hubpad é um espaço aberto onde qualquer pessoa pode compartilhar pensamentos, textos, imagens e arquivos sem precisar criar conta. Tudo fica público e acessível para todos verem.',
+                about_how: 'Como funciona?',
+                about_how_desc: 'É simples: escreva o que quiser, anexe arquivos ou imagens, e envie. Sua mensagem aparecerá no feed junto com todas as outras, e também pode ser descoberta aleatoriamente.',
+                about_subtitle: 'O mural público de tudo e de todos',
+                 created_by: 'Criado por Pedro Borges',
+                 developer: 'Desenvolvedor',
+                 upload_error_single: 'O arquivo "{fileName}" é muito grande. Tamanho máximo: 100MB.',
+                 upload_error_total: 'Os arquivos selecionados ultrapassam o tamanho máximo de 100MB.',
+                 private_toggle: 'Proteger com senha',
+                 private_password_placeholder: 'Digite uma senha...',
+                 private_locked: 'Mensagem protegida',
+                 private_locked_hint: 'Apenas o título é visível publicamente',
+                 private_enter_password: 'Digite a senha para ver',
+                 private_unlock: 'Desbloquear',
+                 private_wrong_password: 'Senha incorreta'
+             },
+             en: {
+                compose_title: 'New message',
+                compose_title_placeholder: 'Title (optional)',
+                compose_placeholder: 'Write something, add files, share...',
+                attach: 'Attach',
+                send: 'Send',
+                tab_feed: 'Feed',
+                tab_random: 'Random',
+                search_placeholder: 'Search...',
+                search_mobile_placeholder: 'Search messages...',
+                search_no_results: 'No messages found',
+                random_btn: 'Next Random',
+                empty_title: 'No messages yet',
+                empty_desc: 'Be the first to share something!',
+                random_empty_title: 'No messages available',
+                random_empty_desc: 'Be the first to post something!',
+                settings_title: 'Settings',
+                settings_subtitle: 'Personalize your experience',
+                settings_language: 'Language',
+                settings_feed: 'Feed',
+                settings_show_all: 'Show all posts',
+                settings_show_all_desc: 'Turn off to see only posts in your language',
+                about_title: 'What is Hubpad?',
+                about_desc: 'Hubpad is an open space where anyone can share thoughts, texts, images, and files without creating an account. Everything is public and accessible for everyone to see.',
+                about_how: 'How does it work?',
+                about_how_desc: 'It\'s simple: write whatever you want, attach files or images, and send. Your message will appear in the feed along with all others, and can also be discovered randomly.',
+                about_subtitle: 'The public mural of everything and everyone',
+                 created_by: 'Created by Pedro Borges',
+                 developer: 'Developer',
+                 upload_error_single: 'The file "{fileName}" is too large. Maximum size: 100MB.',
+                 upload_error_total: 'Selected files exceed the maximum size of 100MB.',
+                 private_toggle: 'Protect with password',
+                 private_password_placeholder: 'Enter a password...',
+                 private_locked: 'Protected message',
+                 private_locked_hint: 'Only the title is publicly visible',
+                 private_enter_password: 'Enter password to view',
+                 private_unlock: 'Unlock',
+                 private_wrong_password: 'Wrong password'
+             },
+             es: {
+                compose_title: 'Nuevo mensaje',
+                compose_title_placeholder: 'Título (opcional)',
+                compose_placeholder: 'Escribe algo, añade archivos, comparte...',
+                attach: 'Adjuntar',
+                send: 'Enviar',
+                tab_feed: 'Feed',
+                tab_random: 'Aleatorio',
+                search_placeholder: 'Buscar...',
+                search_mobile_placeholder: 'Buscar mensajes...',
+                search_no_results: 'Ningún mensaje encontrado',
+                random_btn: 'Siguiente Aleatorio',
+                empty_title: 'Sin mensajes aún',
+                empty_desc: '¡Sé el primero en compartir algo!',
+                random_empty_title: 'No hay mensajes disponibles',
+                random_empty_desc: '¡Sé el primero en publicar algo!',
+                settings_title: 'Configuración',
+                settings_subtitle: 'Personaliza tu experiencia',
+                settings_language: 'Idioma',
+                settings_feed: 'Feed',
+                settings_show_all: 'Ver todos los posts',
+                settings_show_all_desc: 'Desactiva para ver solo posts en tu idioma',
+                about_title: '¿Qué es Hubpad?',
+                about_desc: 'Hubpad es un espacio abierto donde cualquiera puede compartir pensamientos, textos, imágenes y archivos sin necesidad de crear una cuenta. Todo es público y accesible para que todos lo vean.',
+                about_how: '¿Cómo funciona?',
+                about_how_desc: 'Es simple: escribe lo que quieras, adjunta archivos o imágenes, y envía. Tu mensaje aparecerá en el feed junto con todos los demás, y también puede ser descubierto al azar.',
+                about_subtitle: 'El mural público de todo y de todos',
+                 created_by: 'Creado por Pedro Borges',
+                 developer: 'Desarrollador',
+                 upload_error_single: 'El archivo "{fileName}" es demasiado grande. Tamaño máximo: 100MB.',
+                 upload_error_total: 'Los archivos seleccionados superan el tamaño máximo de 100MB.',
+                 private_toggle: 'Proteger con contraseña',
+                 private_password_placeholder: 'Ingresa una contraseña...',
+                 private_locked: 'Mensaje protegido',
+                 private_locked_hint: 'Solo el título es visible públicamente',
+                 private_enter_password: 'Ingresa la contraseña para ver',
+                 private_unlock: 'Desbloquear',
+                 private_wrong_password: 'Contraseña incorrecta'
+             }
+         };
+
+        let currentLang = localStorage.getItem('lang') || 'pt';
+        let showAllPosts = localStorage.getItem('showAllPosts') !== 'false';
+
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcons(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+        });
+
+        function updateThemeIcons(theme) {
+            sunIcon.style.display = theme === 'dark' ? 'none' : 'block';
+            moonIcon.style.display = theme === 'dark' ? 'block' : 'none';
+        }
+
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+         function applyTranslations() {
+             document.querySelectorAll('[data-i18n]').forEach(el => {
+                 const key = el.getAttribute('data-i18n');
+                 if (translations[currentLang][key]) {
+                     if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.hasAttribute('placeholder')) {
+                         el.placeholder = t(key);
+                     } else {
+                         el.textContent = t(key);
+                     }
+                 }
+             });
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            if (tabBtns[0]) tabBtns[0].textContent = t('tab_feed');
+            if (tabBtns[1]) tabBtns[1].textContent = t('tab_random');
+
+            const composeTitle = document.querySelector('.compose-title');
+            if (composeTitle) {
+                const titleSpan = composeTitle.querySelector('.compose-title-text');
+                if (titleSpan) titleSpan.textContent = t('compose_title');
+            }
+
+            const searchInput = document.getElementById('searchInput');
+            const searchInputMobile = document.getElementById('searchInputMobile');
+            if (searchInput) searchInput.placeholder = t('search_placeholder');
+            if (searchInputMobile) searchInputMobile.placeholder = t('search_mobile_placeholder');
+
+            const randomBtn = document.getElementById('loadRandom');
+            if (randomBtn) {
+                const randomSpan = randomBtn.querySelector('.random-text');
+                if (randomSpan) randomSpan.textContent = t('random_btn');
+            }
+
+            document.querySelectorAll('.empty-state h3').forEach(h3 => {
+                if (h3.textContent === 'Nenhuma mensagem ainda' || h3.textContent === 'No messages yet' || h3.textContent === 'Sin mensajes aún') {
+                    h3.textContent = t('empty_title');
+                }
+                if (h3.nextElementSibling && h3.nextElementSibling.tagName === 'P') {
+                    h3.nextElementSibling.textContent = t('empty_desc');
+                }
+            });
+
+            document.querySelectorAll('.no-results p').forEach(p => {
+                p.textContent = t('search_no_results');
+            });
+
+            updatePostLangDisplay();
+        }
+
+        function updatePostLangDisplay() {
+            const allMessages = document.querySelectorAll('#feedMessages .message');
+            allMessages.forEach(msgEl => {
+                const msgId = msgEl.getAttribute('data-message');
+                const msg = messagesData.find(m => String(m.id) === msgId);
+                
+                if (msg) {
+                    if (!showAllPosts && msg.lang && msg.lang !== currentLang) {
+                        msgEl.style.display = 'none';
+                    } else {
+                        msgEl.style.display = '';
+                    }
+                }
+            });
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+            });
+
+            const postLang = document.getElementById('postLang');
+            if (postLang) postLang.value = lang;
+
+            applyTranslations();
+            animateMessages();
+        }
+
+        function toggleShowAllPosts() {
+            showAllPosts = !showAllPosts;
+            localStorage.setItem('showAllPosts', showAllPosts);
+            
+            const toggle = document.getElementById('toggleShowAll');
+            if (toggle) {
+                toggle.classList.toggle('active', showAllPosts);
+            }
+
+            updatePostLangDisplay();
+        }
+
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const searchInput = document.getElementById('searchInput');
+        const searchInputMobile = document.getElementById('searchInputMobile');
+        const fileInput = document.getElementById('fileInput');
+        const fileNamesEl = document.getElementById('fileNames');
+        const randomBtn = document.getElementById('loadRandom');
+        const randomMessage = document.getElementById('randomMessage');
+        const feedMessages = document.getElementById('feedMessages');
+        const noResults = document.getElementById('noResults');
+
+        function updateSearchVisibility(tab) {
+            const showSearch = tab === 'feed';
+            if (searchInput) {
+                if (showSearch) {
+                    searchInput.classList.remove('hidden');
+                } else {
+                    searchInput.classList.add('hidden');
+                }
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.getAttribute('data-tab');
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+
+                updateSearchVisibility(tab);
+
+                if (tab === 'random') {
+                    loadRandomMessage();
+                } else if (tab === 'feed') {
+                    animateMessages();
+                }
+            });
+        });
+
+        function animateMessages() {
+            const messages = document.querySelectorAll('#feedMessages .message');
+            messages.forEach((msg, index) => {
+                msg.classList.remove('visible');
+                setTimeout(() => {
+                    msg.classList.add('visible');
+                }, index * 80);
+            });
+        }
+
+         const MAX_UPLOAD_SIZE = 100 * 1024 * 1024;
+
+         function showUploadError(msg) {
+             const errorEl = document.getElementById('uploadError');
+             if (errorEl) {
+                 errorEl.textContent = msg;
+                 errorEl.style.display = 'block';
+             }
+         }
+
+         function hideUploadError() {
+             const errorEl = document.getElementById('uploadError');
+             if (errorEl) {
+                 errorEl.style.display = 'none';
+             }
+         }
+
+         function validateFiles(files) {
+             let totalSize = 0;
+             for (const file of files) {
+                 totalSize += file.size;
+                 if (file.size > MAX_UPLOAD_SIZE) {
+                     const msg = t('upload_error_single').replace('{fileName}', file.name);
+                     showUploadError(msg);
+                     return false;
+                 }
+             }
+             if (totalSize > MAX_UPLOAD_SIZE) {
+                 showUploadError(t('upload_error_total'));
+                 return false;
+             }
+             hideUploadError();
+             return true;
+         }
+
+         fileInput.addEventListener('change', (e) => {
+             const files = Array.from(e.target.files);
+             if (files.length === 0) {
+                 fileNamesEl.style.display = 'none';
+                 hideUploadError();
+                 return;
+             }
+
+             if (!validateFiles(files)) {
+                 e.target.value = '';
+                 fileNamesEl.style.display = 'none';
+                 return;
+             }
+
+             if (files.length === 1) {
+                 fileNamesEl.textContent = files[0].name;
+                 fileNamesEl.style.display = 'block';
+             } else {
+                 fileNamesEl.textContent = `${files.length} arquivos`;
+                 fileNamesEl.style.display = 'block';
+             }
+         });
+
+         const form = document.querySelector('form[action="/post"]');
+         if (form) {
+             form.addEventListener('submit', (e) => {
+                 const files = Array.from(fileInput.files || []);
+                 if (files.length > 0 && !validateFiles(files)) {
+                     e.preventDefault();
+                 }
+             });
+         }
+
+         const privateToggle = document.getElementById('privateToggle');
+         const isPrivateCheckbox = document.getElementById('isPrivateCheckbox');
+         const passwordField = document.getElementById('passwordField');
+
+         if (privateToggle && isPrivateCheckbox && passwordField) {
+             privateToggle.addEventListener('click', () => {
+                 const isActive = privateToggle.classList.toggle('active');
+                 isPrivateCheckbox.checked = isActive;
+                 passwordField.style.display = isActive ? 'block' : 'none';
+
+                 if (!isActive) {
+                     const passwordInput = passwordField.querySelector('input[type="password"]');
+                     if (passwordInput) passwordInput.value = '';
+                 }
+             });
+         }
+
+         function getUnlockedPosts() {
+             try {
+                 return JSON.parse(localStorage.getItem('unlockedPosts') || '{}');
+             } catch {
+                 return {};
+             }
+         }
+
+         function saveUnlockedPost(id, data) {
+             const unlocked = getUnlockedPosts();
+             unlocked[id] = {
+                 text: data.text || '',
+                 files: data.files || [],
+                 unlockedAt: Date.now()
+             };
+             localStorage.setItem('unlockedPosts', JSON.stringify(unlocked));
+         }
+
+         function isPostUnlocked(id) {
+             const unlocked = getUnlockedPosts();
+             return unlocked[id] !== undefined;
+         }
+
+         function getUnlockedContent(id) {
+             const unlocked = getUnlockedPosts();
+             return unlocked[id] || null;
+         }
+
+         async function tryUnlockMessage(messageId, password) {
+             try {
+                 const response = await fetch('/api/unlock', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ id: messageId, password: password })
+                 });
+                 return await response.json();
+             } catch (e) {
+                 return { success: false, error: 'Connection error' };
+             }
+         }
+
+         function renderFiles(files) {
+             if (!files || files.length === 0) return '';
+
+             let filesHtml = '<div class="message-files">';
+             files.forEach(file => {
+                 const ext = file.filename.split('.').pop().toLowerCase();
+                 const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                 const videoExts = ['mp4', 'webm', 'ogg'];
+                 const audioExts = ['mp3', 'wav', 'ogg', 'm4a'];
+
+                 let previewHtml = '';
+                 if (imgExts.includes(ext)) {
+                     previewHtml = `<a href="/uploads/${file.filename}" target="_blank"><img src="/uploads/${file.filename}" alt="${file.original}"></a>`;
+                 } else if (videoExts.includes(ext)) {
+                     previewHtml = `<a href="/uploads/${file.filename}" target="_blank"><video src="/uploads/${file.filename}" muted controls playsinline></video></a>`;
+                 } else if (audioExts.includes(ext)) {
+                     previewHtml = `<div><audio controls style="width: 100%;"><source src="/uploads/${file.filename}"></audio></div>`;
+                 } else if (ext === 'txt') {
+                     previewHtml = `<a href="/uploads/${file.filename}" target="_blank"><div class="text-preview">Carregando...</div></a>`;
+                 } else {
+                     previewHtml = `<a href="/uploads/${file.filename}" target="_blank">
+                         <div class="file-icon">
+                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                 <polyline points="14,2 14,8 20,8"></polyline>
+                             </svg>
+                             <span style="font-size: 12px; font-weight: 600;">${ext.toUpperCase()}</span>
+                         </div>
+                     </a>`;
+                 }
+
+                 filesHtml += `<div class="file-preview">${previewHtml}<div class="file-info" title="${file.original}">${file.original}</div></div>`;
+             });
+             filesHtml += '</div>';
+             return filesHtml;
+         }
+
+         function renderPrivateLockedUI(messageId) {
+             return `
+                 <div class="private-icon-wrapper">
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                     </svg>
+                 </div>
+                 <div class="private-locked-text">${t('private_locked')}</div>
+                 <div class="private-locked-hint">${t('private_locked_hint')}</div>
+                 <div class="private-unlock-row">
+                     <input type="password" class="private-password-input" placeholder="${t('private_enter_password')}">
+                     <button class="private-unlock-btn" data-unlock-id="${messageId}">${t('private_unlock')}</button>
+                 </div>
+                 <div class="private-error-msg">${t('private_wrong_password')}</div>
+             `;
+         }
+
+         function renderMessage(message) {
+             const titleHtml = message.title ? `<h3 class="message-title">${message.title}</h3>` : '';
+             const isPrivate = message.is_private;
+
+             let privateBadge = '';
+             if (isPrivate) {
+                 privateBadge = `
+                     <span class="private-badge">
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                         </svg>
+                     </span>
+                 `;
+             }
+
+             let bodyContent = '';
+
+             if (isPrivate) {
+                 const alreadyUnlocked = isPostUnlocked(message.id);
+
+                 if (alreadyUnlocked) {
+                     bodyContent = `
+                         ${titleHtml}
+                         <div class="private-message-content" style="display: block;"></div>
+                     `;
+                 } else {
+                     bodyContent = `
+                         ${titleHtml}
+                         <div class="private-locked-area" data-message-id="${message.id}">
+                             ${renderPrivateLockedUI(message.id)}
+                         </div>
+                         <div class="private-message-content"></div>
+                     `;
+                 }
+             } else {
+                 const filesHtml = renderFiles(message.files);
+                 bodyContent = `
+                     ${titleHtml}
+                     <div class="message-text">${message.text || ''}</div>
+                     ${filesHtml}
+                 `;
+             }
+
+             return `
+                 <div class="message visible" data-message="${message.id}" ${isPrivate ? 'data-is-private="true"' : ''}>
+                     <div class="message-header">
+                         <span class="message-id">#${message.id}</span>
+                         <span class="message-date">${message.date}</span>
+                         ${privateBadge}
+                     </div>
+                     <div class="message-body">
+                         ${bodyContent}
+                     </div>
+                 </div>
+              `;
+          }
+
+         function showUnlockedContent(container, data) {
+             const text = data.text || '';
+             const files = data.files || [];
+             const filesHtml = renderFiles(files);
+
+             container.innerHTML = `
+                 <div class="message-text">${text}</div>
+                 ${filesHtml}
+             `;
+             container.style.display = 'block';
+
+             setTimeout(() => {
+                 const txtPreviews = container.querySelectorAll('[data-txt]');
+                 txtPreviews.forEach(el => {
+                     fetch(el.getAttribute('data-txt'))
+                         .then(r => r.text())
+                         .then(text => {
+                             el.textContent = text.substring(0, 400);
+                             if (text.length > 400) el.textContent += '...';
+                         })
+                         .catch(() => {
+                             el.textContent = 'Não foi possível carregar';
+                         });
+                 });
+             }, 0);
+         }
+
+         async function handleUnlockClick(button) {
+             const messageId = button.getAttribute('data-unlock-id');
+             if (!messageId) return;
+
+             const lockedArea = button.closest('.private-locked-area');
+             const messageEl = button.closest('.message');
+             const contentArea = messageEl.querySelector('.private-message-content');
+             const passwordInput = lockedArea.querySelector('.private-password-input');
+             const errorEl = lockedArea.querySelector('.private-error-msg');
+
+             const password = passwordInput.value.trim();
+             if (!password) {
+                 passwordInput.focus();
+                 return;
+             }
+
+             button.disabled = true;
+             const originalText = button.textContent;
+             button.textContent = '...';
+
+             const result = await tryUnlockMessage(parseInt(messageId), password);
+
+             button.disabled = false;
+             button.textContent = originalText;
+
+             if (result.success) {
+                 saveUnlockedPost(messageId, result);
+                 if (lockedArea) lockedArea.style.display = 'none';
+                 if (errorEl) errorEl.style.display = 'none';
+                 if (contentArea) {
+                     showUnlockedContent(contentArea, result);
+                 }
+             } else {
+                 if (errorEl) errorEl.style.display = 'block';
+                 passwordInput.value = '';
+                 passwordInput.focus();
+             }
+         }
+
+         async function loadUnlockedPost(messageId) {
+             const result = await tryUnlockMessage(parseInt(messageId), '');
+             if (!result.success) {
+                 const unlocked = getUnlockedPosts();
+                 delete unlocked[messageId];
+                 localStorage.setItem('unlockedPosts', JSON.stringify(unlocked));
+             }
+             return result;
+         }
+
+         function initializePrivatePosts() {
+             document.querySelectorAll('.private-locked-area').forEach(area => {
+                 const msgId = area.getAttribute('data-message-id');
+
+                 if (area.children.length === 0) {
+                     area.innerHTML = renderPrivateLockedUI(msgId);
+                 }
+
+                 const button = area.querySelector('.private-unlock-btn');
+                 const input = area.querySelector('.private-password-input');
+
+                 if (button && !button.dataset.initialized) {
+                     button.dataset.initialized = 'true';
+                     button.addEventListener('click', (e) => {
+                         e.preventDefault();
+                         handleUnlockClick(button);
+                     });
+                 }
+
+                 if (input && !input.dataset.initialized) {
+                     input.dataset.initialized = 'true';
+                     input.addEventListener('keydown', (e) => {
+                         if (e.key === 'Enter') {
+                             e.preventDefault();
+                             const btn = area.querySelector('.private-unlock-btn');
+                             if (btn) handleUnlockClick(btn);
+                         }
+                     });
+                 }
+             });
+
+             document.querySelectorAll('.message[data-is-private="true"]').forEach(async (msgEl) => {
+                 const msgId = msgEl.getAttribute('data-message');
+                 const contentArea = msgEl.querySelector('.private-message-content');
+                 const lockedArea = msgEl.querySelector('.private-locked-area');
+
+                 if (!contentArea && lockedArea) {
+                     const parent = lockedArea.parentElement;
+                     const div = document.createElement('div');
+                     div.className = 'private-message-content';
+                     lockedArea.after(div);
+                 }
+
+                 const actualContentArea = msgEl.querySelector('.private-message-content');
+             });
+         }
+
+          function loadRandomMessage() {
+             let filteredMessages = messagesData;
+             if (!showAllPosts) {
+                 filteredMessages = messagesData.filter(m => m.lang === currentLang);
+             }
+             filteredMessages = filteredMessages.filter(m => !m.is_private);
+
+             if (filteredMessages.length === 0) {
+                randomMessage.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.4; margin-bottom: 16px;">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <h3>${t('random_empty_title')}</h3>
+                        <p>${t('random_empty_desc')}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let random;
+            const currentEl = randomMessage.querySelector('.message');
+            if (currentEl && filteredMessages.length > 1) {
+                const currentId = currentEl.querySelector('.message-id')?.textContent?.replace('#', '');
+                do {
+                    random = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
+                } while (String(random.id) === currentId);
+            } else {
+                random = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
+            }
+
+            randomMessage.innerHTML = renderMessage(random);
+            initializePrivatePosts();
+        }
+
+        randomBtn.addEventListener('click', () => {
+            randomBtn.classList.add('shuffling');
+            setTimeout(() => randomBtn.classList.remove('shuffling'), 500);
+            loadRandomMessage();
+        });
+
+        function performSearch(query) {
+            query = query.toLowerCase().trim();
+            const allMessages = document.querySelectorAll('#feedMessages .message');
+            
+            if (!query) {
+                allMessages.forEach(msg => {
+                    const msgId = msg.getAttribute('data-message');
+                    const msgData = messagesData.find(m => String(m.id) === msgId);
+                    if (!showAllPosts && msgData && msgData.lang && msgData.lang !== currentLang) {
+                        msg.style.display = 'none';
+                    } else {
+                        msg.style.display = '';
+                    }
+                });
+                noResults.style.display = 'none';
+                return;
+            }
+
+            let hasResults = false;
+
+            allMessages.forEach(msgEl => {
+                const msgId = msgEl.getAttribute('data-message');
+                const msg = messagesData.find(m => String(m.id) === msgId);
+                
+                if (!msg) {
+                    msgEl.style.display = 'none';
+                    return;
+                }
+
+                if (!showAllPosts && msg.lang && msg.lang !== currentLang) {
+                    msgEl.style.display = 'none';
+                    return;
+                }
+
+                const titleMatch = msg.title && msg.title.toLowerCase().includes(query);
+                const textMatch = msg.text && msg.text.toLowerCase().includes(query);
+                const idMatch = String(msg.id).includes(query);
+                const fileMatch = msg.files && msg.files.some(f => 
+                    f.original.toLowerCase().includes(query)
+                );
+
+                if (titleMatch || textMatch || idMatch || fileMatch) {
+                    msgEl.style.display = '';
+                    hasResults = true;
+                } else {
+                    msgEl.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = hasResults ? 'none' : 'block';
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            if (searchInputMobile) searchInputMobile.value = e.target.value;
+            performSearch(e.target.value);
+        });
+
+        if (searchInputMobile) {
+            searchInputMobile.addEventListener('input', (e) => {
+                searchInput.value = e.target.value;
+                performSearch(e.target.value);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const postLang = document.getElementById('postLang');
+            if (postLang) postLang.value = currentLang;
+
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.getAttribute('data-lang') === currentLang);
+                opt.addEventListener('click', () => {
+                    changeLanguage(opt.getAttribute('data-lang'));
+                });
+            });
+
+            const toggleShowAll = document.getElementById('toggleShowAll');
+            if (toggleShowAll) {
+                toggleShowAll.classList.toggle('active', showAllPosts);
+                toggleShowAll.addEventListener('click', toggleShowAllPosts);
+            }
+
+            const logoBtn = document.getElementById('logoBtn');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalClose = document.getElementById('modalClose');
+
+            if (logoBtn && modalOverlay) {
+                logoBtn.addEventListener('click', () => {
+                    modalOverlay.classList.add('active');
+                });
+            }
+
+            if (modalClose && modalOverlay) {
+                modalClose.addEventListener('click', () => {
+                    modalOverlay.classList.remove('active');
+                });
+            }
+
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) {
+                        modalOverlay.classList.remove('active');
+                    }
+                });
+            }
+
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
+            const settingsModalClose = document.getElementById('settingsModalClose');
+
+            if (settingsBtn && settingsModal) {
+                settingsBtn.addEventListener('click', () => {
+                    settingsModal.classList.add('active');
+                });
+            }
+
+            if (settingsModalClose && settingsModal) {
+                settingsModalClose.addEventListener('click', () => {
+                    settingsModal.classList.remove('active');
+                });
+            }
+
+            if (settingsModal) {
+                settingsModal.addEventListener('click', (e) => {
+                    if (e.target === settingsModal) {
+                        settingsModal.classList.remove('active');
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                const aboutModal = document.getElementById('modalOverlay');
+                const settingsMod = document.getElementById('settingsModal');
+                
+                if (e.key === 'Escape') {
+                    if (aboutModal && aboutModal.classList.contains('active')) {
+                        aboutModal.classList.remove('active');
+                    }
+                    if (settingsMod && settingsMod.classList.contains('active')) {
+                        settingsMod.classList.remove('active');
+                    }
+                }
+            });
+
+            applyTranslations();
+            updateSearchVisibility('feed');
+            setTimeout(animateMessages, 100);
+
+             const txtPreviews = document.querySelectorAll('[data-txt]');
+             txtPreviews.forEach(el => {
+                 fetch(el.getAttribute('data-txt'))
+                     .then(r => r.text())
+                     .then(text => {
+                         el.textContent = text.substring(0, 400);
+                         if (text.length > 400) el.textContent += '...';
+                     })
+                     .catch(() => {
+                         el.textContent = 'Não foi possível carregar';
+                     });
+             });
+
+             initializePrivatePosts();
+         });
+    </script>
+
+     <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <button class="modal-close" id="settingsModalClose">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;" data-i18n="settings_title">Configurações</h2>
+            <p class="modal-subtitle" data-i18n="settings_subtitle">Personalize sua experiência</p>
+            
+            <div class="modal-section">
+                <h3 data-i18n="settings_language">Idioma</h3>
+                <div class="lang-selector">
+                    <div class="lang-option active" data-lang="pt">
+                        <span class="lang-flag">🇧🇷</span>
+                        <span class="lang-name">Português</span>
+                    </div>
+                    <div class="lang-option" data-lang="en">
+                        <span class="lang-flag">🇺🇸</span>
+                        <span class="lang-name">English</span>
+                    </div>
+                    <div class="lang-option" data-lang="es">
+                        <span class="lang-flag">🇪🇸</span>
+                        <span class="lang-name">Español</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <div class="modal-section">
+                <h3 data-i18n="settings_feed">Feed</h3>
+                <div class="toggle-container" style="margin-top: 12px;">
+                    <div>
+                        <div class="toggle-label" data-i18n="settings_show_all">Ver todos os posts</div>
+                        <div class="toggle-desc" data-i18n="settings_show_all_desc">Desative para ver apenas posts do seu idioma</div>
+                    </div>
+                    <div class="toggle-switch active" id="toggleShowAll"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+             <div class="modal-overlay" id="modalOverlay">
+         <div class="modal">
+             <button class="modal-close" id="modalClose">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                     <line x1="18" y1="6" x2="6" y2="18"></line>
+                     <line x1="6" y1="6" x2="18" y2="18"></line>
+                 </svg>
+             </button>
+             
+             <div class="modal-logo"><span>H</span>ubpad</div>
+             <p class="modal-subtitle" data-i18n="about_subtitle">O mural público de tudo e de todos</p>
+             
+             <div class="modal-section">
+                 <h3 data-i18n="about_title">O que é o Hubpad?</h3>
+                 <p data-i18n="about_desc">Hubpad é um espaço aberto onde qualquer pessoa pode compartilhar pensamentos, textos, imagens e arquivos sem precisar criar conta. Tudo fica público e acessível para todos verem.</p>
+             </div>
+
+             <div class="modal-section">
+                 <h3 data-i18n="about_how">Como funciona?</h3>
+                 <p data-i18n="about_how_desc">É simples: escreva o que quiser, anexe arquivos ou imagens, e envie. Sua mensagem aparecerá no feed junto com todas as outras, e também pode ser descoberto aleatoriamente.</p>
+             </div>
+
+             <div class="modal-divider"></div>
+
+             <div class="modal-creator">
+                 <div class="creator-avatar">PB</div>
+                 <div class="creator-info">
+                     <h4>Pedro Borges</h4>
+                     <p data-i18n="developer">Desenvolvedor</p>
+                     <a href="https://github.com/MCookinho" target="_blank" class="github-link">
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                         </svg>
+                         github.com/MCookinho
+                     </a>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </body>
+ </html>
